@@ -5,7 +5,9 @@ charset-normalizer==3.4.7
 cryptography==47.0.0
 Django==6.0.4
 django-allauth==65.16.1
+gunicorn==26.0.0
 idna==3.13
+packaging==26.2
 pillow==12.2.0
 pycparser==3.0
 PyJWT==2.12.1
