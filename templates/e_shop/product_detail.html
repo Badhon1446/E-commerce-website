@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <!-- ================= BREADCRUMB ================= -->
+  <nav class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'e_shop:home' %}">Home</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href=" {% url 'e_shop:product_list' %} ">Products</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href=" {% url 'e_shop:product_list' %} ">{{ product.category.name }}</a>
+      </li>
+      <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <!-- ================= PRODUCT SECTION ================= -->
+  <div class="row">
+    <!-- Image -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <img src="{{ product.image.url }}" class="w-100" style="height:400px; object-fit:cover;" />
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="col-md-6">
+      <h3>{{ product.name }}</h3>
+
+      <h4 class="text-primary">৳ {{ product.price }}</h4>
+
+      <p class="text-success">
+        {% if product.available %}
+          In Stock
+        {% else %}
+          Out of Stock
+        {% endif %}
+      </p>
+
+      <p>{{ product.description|truncatewords:25 }}</p>
+
+      <!-- ⭐ Rating Display -->
+      <div class="mb-3">
+        {% for i in "12345" %}
+          {% if forloop.counter <= product.avg_rating|default:0 %}
+            <i class="bi bi-star-fill text-warning"></i>
+          {% else %}
+            <i class="bi bi-star text-warning"></i>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Quantity + Cart -->
+      <div class="d-flex mb-3">
+        <input type="number" value="1" min="1" class="form-control me-2" style="width:100px;" />
+        <form action="{% url 'e_shop:cart_add' product.id %}" method="POST" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-primary w-100">Add to Cart</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TABS ================= -->
+  <ul class="nav nav-tabs mt-5" id="productTab">
+    <li class="nav-item">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#desc">Description</button>
+    </li>
+
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Reviews</button>
+    </li>
+  </ul>
+
+  <div class="tab-content p-3 bg-white shadow-sm">
+    <!-- Description -->
+    <div class="tab-pane fade show active" id="desc">
+      <p>{{ product.description }}</p>
+    </div>
+  
+    <div class="tab-pane p-3 bg-white active" id="reviews">
+      <!-- Reviews -->
+      <h3>{{ product.name }}</h3>
+
+      <!-- গড় রেটিং ও স্টার -->
+      <div class="mb-3">
+        {% with avg=product.average_rating|default:0 %}
+          {% for i in "12345" %}
+            {% if forloop.counter <= avg %}
+              <i class="bi bi-star-fill text-warning"></i>
+            {% else %}
+              <i class="bi bi-star text-warning"></i>
+            {% endif %}
+          {% endfor %}
+          <span>({{ avg }}/5 – {{ product.ratings.count }} rating)</span>
+        {% endwith %}
+      </div>
+
+      <!-- কমেন্ট লিস্ট -->
+      <h4>Rating & Comment</h4>
+      {% for rating in ratings %}
+        <div class="border p-2 mb-2">
+          <strong>{{ rating.user.username }}</strong>
+          rate:{% for i in "12345" %}
+            {% if forloop.counter <= rating.rating %}
+              <i class="bi bi-star-fill text-warning"></i>
+            {% else %}
+              <i class="bi bi-star text-warning"></i>
+            {% endif %}
+          {% endfor %}
+          <small class="text-muted float-end">{{ rating.created|date:'d M Y' }}</small>
+          <p class="mt-1">{{ rating.comment|default:'No comment' }}</p>
+        </div>
+      {% empty %}
+        <p>No comment yet. Be the first one!</p>
+      {% endfor %}
+
+      <!-- রেট দেওয়ার লিংক -->
+      {% if user.is_authenticated %}
+        <a href="{% url 'e_shop:rate_product' product_id=product.id %}" class="btn btn-primary mt-3">Rate this product</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ================= RELATED PRODUCTS ================= -->
+  <h4 class="mt-5 mb-4">Related Products</h4>
+
+  <div class="row">
+    {% for item in related_product|slice:':4' %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 shadow-sm product-card">
+          <img src="{{ item.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;" />
+          <div class="card-body text-center">
+            <h6>{{ item.name }}</h6>
+            <p class="text-muted">৳ {{ item.price }}</p>
+            <a href=" {% url 'e_shop:product_detail' item.slug %} " class="btn btn-sm btn-outline-primary">View</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No Product Related</p>
+    {% endfor %}
+  </div>
+
+  <!-- ================= STYLE ================= -->
+  <style>
+    .product-card {
+      transition: 0.3s;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+  </style>
+{% endblock %}

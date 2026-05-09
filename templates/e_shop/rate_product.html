@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Rating: {{ product.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.rating.label_tag }}
+                            {{ form.rating }}
+                            {% if form.rating.errors %}
+                                <div class="text-danger">{{ form.rating.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.comment.label_tag }}
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                                <div class="text-danger">{{ form.comment.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                        <a href="{% url 'e_shop:product_detail' slug=product.slug %}" class="btn btn-secondary">বাতিল</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

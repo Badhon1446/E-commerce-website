@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0"><i class="bi bi-cart-fill text-primary me-2"></i> My Cart</h2>
+                <span class="badge bg-secondary rounded-pill px-3 py-2" id="cartItemCount">0 items</span>
+            </div>
+
+            {% if cart and cart.items.all %}
+                <div class="table-responsive">
+                    <table class="table align-middle" id="cartTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                                <th>Remove</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartItemsBody">
+                            {% for item in cart.items.all %}
+                            <tr data-item-id="{{ item.id }}"
+                                data-product-id="{{ item.product.id }}"
+                                data-price="{{ item.product.price }}"
+                                data-name="{{ item.product.name }}"
+                                data-image="{{ item.product.image.url }}"
+                                data-slug="{{ item.product.slug }}"
+                                data-stock="{{ item.product.stock }}">   <!-- stock added -->
+                                <!-- Product -->
+                                <td data-label="Product">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-img" width="60" height="60">
+                                        <span class="fw-semibold">{{ item.product.name }}</span>
+                                    </div>
+                                </td>
+                                <!-- Quantity controls -->
+                                <td data-label="Quantity">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="quantity-control">
+                                            <button type="button" class="qty-btn-mini" data-action="minus">−</button>
+                                            <span class="qty-number-display mx-2 fw-bold">{{ item.quantity }}</span>
+                                            <button type="button" class="qty-btn-mini" data-action="plus">+</button>
+                                        </div>
+                                        <button class="btn update-item-btn p-0 ms-1" title="Update quantity">
+                                            <i class="fas fa-sync-alt text-primary fs-6"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <!-- Unit price -->
+                                <td data-label="Unit Price">${{ item.product.price|floatformat:2 }}</td>
+                                <!-- Item total -->
+                                <td data-label="Total" class="item-total">${{ item.product.price|floatformat:2 }}</td>
+                                <!-- Remove -->
+                                <td data-label="Remove">
+                                    <button class="btn remove-item-btn p-0" title="Remove item">
+                                        <i class="fas fa-trash-alt text-danger fs-5"></i>
+                                    </button>
+                                </td>
+                                <!-- Details -->
+                                <td data-label="Details">
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill details-btn">
+                                        <i class="bi bi-info-circle me-1"></i> Details
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cart Summary with Continue Shopping -->
+                <div class="row mt-4 pt-3 border-top align-items-center">
+                    <div class="col-md-6">
+                        <a href="{% url 'e_shop:product_list' %}" class="btn btn-outline-secondary rounded-pill">
+                            <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span id="cartSubtotal">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>Total:</span>
+                                <span class="text-success" id="cartTotal">$0.00</span>
+                            </div>
+                            <hr>
+                            <a href="{% url 'e_shop:checkout' %}" class="btn btn-primary w-100 py-2 rounded-pill">Proceed to Checkout <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-emoji-frown fs-1 text-muted"></i>
+                    <h4 class="mt-3">Your cart is empty</h4>
+                    <p>Add some products to your cart and come back.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'e_shop:product_list' %}" class="btn btn-primary rounded-pill">Browse Products</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal (unchanged except stock status) -->
+<div class="modal fade" id="itemDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title fw-bold"><i class="bi bi-box-seam me-2"></i> Item Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="modalDynamicContent"></div>
+            <div class="modal-footer bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .product-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 12px;
+        background: #f2f2f2;
+    }
+    .quantity-control {
+        display: inline-flex;
+        align-items: center;
+        background: #f8f9fa;
+        border-radius: 30px;
+        padding: 4px 8px;
+        border: 1px solid #dee2e6;
+    }
+    .qty-btn-mini {
+        background: white;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 1.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+        color: #0d6efd;
+    }
+    .qty-btn-mini:hover {
+        background: #e9ecef;
+    }
+    .qty-number-display {
+        font-size: 1rem;
+        min-width: 30px;
+        text-align: center;
+    }
+    .update-item-btn i, .remove-item-btn i {
+        pointer-events: none;
+    }
+    @media (max-width: 768px) {
+        .table thead { display: none; }
+        .table tbody tr { display: block; margin-bottom: 1rem; border: 1px solid #dee2e6; border-radius: 16px; padding: 0.75rem; }
+        .table tbody td { display: flex; justify-content: space-between; align-items: center; border: none; padding: 0.5rem 0; }
+        .table tbody td:before { content: attr(data-label); font-weight: 600; width: 40%; }
+    }
+</style>
+
+<script>
+    function updateCartTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('#cartItemsBody tr').forEach(row => {
+            const price = parseFloat(row.querySelector('td:nth-child(3)').innerText.replace('$', ''));
+            const qtySpan = row.querySelector('.qty-number-display');
+            let qty = qtySpan ? parseInt(qtySpan.innerText) : 1;
+            const itemTotal = price * qty;
+            row.querySelector('.item-total').innerText = '$' + itemTotal.toFixed(2);
+            subtotal += itemTotal;
+        });
+        document.getElementById('cartSubtotal').innerText = '$' + subtotal.toFixed(2);
+        document.getElementById('cartTotal').innerText = '$' + subtotal.toFixed(2);
+        const itemCount = Array.from(document.querySelectorAll('#cartItemsBody .qty-number-display')).reduce((sum, span) => sum + parseInt(span.innerText), 0);
+        document.getElementById('cartItemCount').innerText = itemCount + ' ' + (itemCount === 1 ? 'item' : 'items');
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    async function sendPost(url, data) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Request failed');
+        return await response.json();
+    }
+
+    async function updateQuantity(productId, newQuantity, row) {
+        const stock = parseInt(row.dataset.stock);
+        if (newQuantity > stock) {
+            alert(`You cannot add more than ${stock} items. Only ${stock} in stock.`);
+            // revert display to old value
+            const oldQty = parseInt(row.querySelector('.qty-number-display').innerText);
+            row.querySelector('.qty-number-display').innerText = oldQty;
+            return;
+        }
+        try {
+            const result = await sendPost(`/cart/update/${productId}/`, { quantity: newQuantity });
+            if (result.success) {
+                const qtySpan = row.querySelector('.qty-number-display');
+                if (qtySpan) qtySpan.innerText = newQuantity;
+                updateCartTotals();
+            } else {
+                alert(result.error || 'Failed to update quantity');
+                // revert
+                const oldQty = parseInt(row.querySelector('.qty-number-display').innerText);
+                row.querySelector('.qty-number-display').innerText = oldQty;
+            }
+        } catch (err) {
+            alert('Error updating cart');
+        }
+    }
+
+    async function removeItem(productId, row) {
+        if (!confirm('Remove this item?')) return;
+        try {
+            await sendPost(`/cart/remove/${productId}/`, {});
+            row.remove();
+            updateCartTotals();
+            if (document.querySelectorAll('#cartItemsBody tr').length === 0) location.reload();
+        } catch (err) {
+            alert('Error removing item');
+        }
+    }
+
+    function showDetailsModal(row) {
+    const productName = row.dataset.name;
+    const productImage = row.dataset.image;
+    const productPrice = parseFloat(row.dataset.price);
+    const qty = parseInt(row.querySelector('.qty-number-display').innerText);
+    const totalAmount = (productPrice * qty).toFixed(2);
+    const productSlug = row.dataset.slug;
+    const stock = parseInt(row.dataset.stock);
+    const stockStatus = stock > 0 ? `<span class="badge bg-success">In Stock (${stock} available)</span>` : `<span class="badge bg-danger">Out of Stock</span>`;
+    const modalBody = document.getElementById('modalDynamicContent');
+    modalBody.innerHTML = `
+        <div class="mb-3"><h4 class="fw-semibold">${escapeHtml(productName)}</h4><hr></div>
+        <table class="table table-bordered">
+            <tr><th style="width:35%">Product</th><td><div class="d-flex gap-3"><img src="${productImage}" width="60" class="rounded"><span>${escapeHtml(productName)}</span></div></td></tr>
+            <tr><th>Stock Status</th><td>${stockStatus}</td></tr>
+            <tr><th>Payment Status</th><td><span class="badge bg-warning">Unpaid</span></td></tr>
+            <tr><th>Total Amount</th><td class="fw-bold text-success">$${totalAmount}</td></tr>
+            <tr><th>Action</th><td><a href="/product/${productSlug}/" class="btn btn-sm btn-outline-info me-2" target="_blank">View</a><button class="btn btn-sm btn-outline-warning rate-btn">Rate</button></td></tr></table>`;
+    
+    const rateBtn = modalBody.querySelector('.rate-btn');
+    if (rateBtn) {
+        const productId = row.dataset.productId;   // productId সংগ্রহ
+        rateBtn.addEventListener('click', () => {
+            if (productId) {
+                // তোমার URL pattern অনুযায়ী – সাধারণত /rate/<id>/
+                window.location.href = `/rate/${productId}/`;
+            } else {
+                alert('No Product found!');
+            }
+        });
+    }
+    
+    new bootstrap.Modal(document.getElementById('itemDetailModal')).show();
+}
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function bindEvents() {
+        document.querySelectorAll('#cartItemsBody tr').forEach(row => {
+            const productId = row.dataset.productId;
+            const minusBtn = row.querySelector('[data-action="minus"]');
+            const plusBtn = row.querySelector('[data-action="plus"]');
+            const updateBtn = row.querySelector('.update-item-btn');
+            const removeBtn = row.querySelector('.remove-item-btn');
+            const detailsBtn = row.querySelector('.details-btn');
+            const qtySpan = row.querySelector('.qty-number-display');
+            const stock = parseInt(row.dataset.stock);
+
+            minusBtn?.addEventListener('click', () => {
+                let val = parseInt(qtySpan.innerText);
+                if (val > 1) qtySpan.innerText = val - 1;
+            });
+            plusBtn?.addEventListener('click', () => {
+                let val = parseInt(qtySpan.innerText);
+                if (val < stock) {
+                    qtySpan.innerText = val + 1;
+                } else {
+                    alert(`Cannot exceed available stock (${stock})`);
+                }
+            });
+            updateBtn?.addEventListener('click', async () => {
+                const newQty = parseInt(qtySpan.innerText);
+                await updateQuantity(productId, newQty, row);
+            });
+            removeBtn?.addEventListener('click', () => removeItem(productId, row));
+            detailsBtn?.addEventListener('click', () => showDetailsModal(row));
+        });
+    }
+
+    if (document.querySelector('#cartItemsBody tr')) {
+        updateCartTotals();
+        bindEvents();
+    }
+</script>
+{% endblock %}

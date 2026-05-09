@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Login | Your Brand{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-4">
+
+                <!-- Login Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Username or Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+
+                <!-- Divider -->
+                <div class="text-center mt-4">
+                    <p>OR</p>
+                    <a href="{% provider_login_url 'google' next=request.GET.next %}" class="btn btn-outline-danger w-100 d-flex justify-content-center align-items-center gap-2">
+                        <i class="bi bi-google"></i>
+            Continue with Google</a>
+                </div>
+
+                <!-- Register Link -->
+                <div class="text-center mt-4">
+                    <p class="mb-0">Don't have an account? <a href="{% url 'e_shop:register' %}">Register</a></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

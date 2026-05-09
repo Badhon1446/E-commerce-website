@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>e_shop</title>
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- (Optional) Font Awesome (extra icons if needed later) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      
+      .logo {
+        font-weight: bold;
+        font-size: 22px;
+        color: #0d6efd;
+      }
+      
+      /* Active Nav Style */
+      .nav-link.active {
+        color: #0d6efd !important;
+        font-weight: 600;
+        border-bottom: 2px solid #0d6efd;
+      }
+      
+      footer {
+        background: #212529;
+        color: white;
+        padding: 40px 0;
+        margin-top: 50px;
+      }
+      
+      footer a {
+        color: #adb5bd;
+        text-decoration: none;
+      }
+      
+      footer a:hover {
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+      <div class="container">
+        <!-- Left Logo -->
+        <a class="navbar-brand logo" href="{% url 'e_shop:home' %}">e_shop</a>
+
+        <!-- Toggle -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
+
+        <!-- Right Nav -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <!-- Home -->
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'e_shop:home' %}">Home</a>
+            </li>
+
+            <!-- Products -->
+            <li class="nav-item">
+              <a class="nav-link {% if '/product' in request.path %}active{% endif %}" href="{% url 'e_shop:product_list' %}">Products</a>
+            </li>
+
+            <!-- Cart -->
+            <li class="nav-item">
+              <a class="nav-link position-relative {% if '/cart' in request.path %}active{% endif %}" href="{% url 'e_shop:cart_detail' %}">
+                <i class="bi bi-cart4"></i>{% if cart_items_count > 0 %}
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_items_count }}</span>
+                {% endif %}
+              </a>
+            </li>
+
+            {% if user.is_authenticated %}
+              <!-- 🔽 USER DROPDOWN -->
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">👤 {{ user.username }}</a>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="{% url 'e_shop:profile' %}">Profile</a>
+                  </li>
+
+                  <li>
+                    <a class="dropdown-item" href=" {% url 'e_shop:profile_update' %} ">Update Profile</a>
+                  </li>
+
+                  <li>
+                    <hr class="dropdown-divider" />
+                  </li>
+
+                  <li>
+                    <a class="dropdown-item text-danger" href="{% url 'e_shop:logout' %}">Logout</a>
+                  </li>
+                </ul>
+              </li>
+            {% else %}
+              <!-- Login -->
+              <li class="nav-item">
+                <a class="nav-link {% if '/login' in request.path %}active{% endif %}" href="{% url 'e_shop:login' %}">Login</a>
+              </li>
+
+              <!-- Register -->
+              <li class="nav-item">
+                <a class="nav-link {% if '/register' in request.path %}active{% endif %}" href="{% url 'e_shop:register' %}">Register</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MESSAGES -->
+    <div class="container mt-3">
+      {% if messages %}
+        {% for message in messages %}
+          {% if message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% elif message.tags == 'info' %}
+            <div class="alert alert-info alert-dismissible fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% elif message.tags == 'warning' %}
+            <div class="alert alert-warning alert-dismissible fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% elif message.tags == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container mt-4">
+      {% block content %}
+
+      {% endblock %}
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="container">
+        <div class="row">
+          <!-- About -->
+          <div class="col-md-4">
+            <h5>About Us</h5>
+            <p>e_shop is a modern online shopping platform dedicated to providing quality products at affordable prices. We aim to deliver a smooth and secure shopping experience for every customer.</p>
+          </div>
+
+          <!-- Contact -->
+          <div class="col-md-4">
+            <h5>Contact</h5>
+            <p>Email: support@eshop.com</p>
+            <p>Phone: +8801848*****</p>
+            <p>Location: Dhaka, Bangladesh</p>
+          </div>
+
+          <!-- Social -->
+          <div class="col-md-4">
+            <h5>Stay Connected</h5>
+
+            <a href="#" class="d-block mb-2"><i class="bi bi-facebook"></i> Facebook</a>
+            <a href="#" class="d-block mb-2"><i class="bi bi-linkedin"></i> LinkedIn</a>
+            <a href="#" class="d-block mb-2"><i class="bi bi-github"></i> GitHub</a>
+          </div>
+        </div>
+
+        <hr class="bg-light" />
+
+        <div class="text-center">
+          <small>&copy; 2026 e_shop. All rights reserved.</small>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS (Carousel included here automatically) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

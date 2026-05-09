@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block content %}
+  <div class="row justify-content-center mt-4">
+    <div class="col-md-7">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+          <h3 class="text-center text-success fw-bold mb-4">Create Account</h3>
+          <form method="POST" novalidate>
+            {% csrf_token %}
+
+            <div class="row">
+              <!-- First Name -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="first_name">First Name</label>
+
+                <input type="text" class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" id="first_name" name="first_name" value="{{ form.first_name.value|default:'' }}" required />
+
+                <div class="text-danger small">{{ form.first_name.errors|striptags }}</div>
+              </div>
+
+              <!-- Last Name -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="last_name">Last Name</label>
+
+                <input type="text" class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" id="last_name" name="last_name" value="{{ form.last_name.value|default:'' }}" required />
+
+                <div class="text-danger small">{{ form.last_name.errors|striptags }}</div>
+              </div>
+            </div>
+
+            <!-- Username -->
+            <div class="mb-3">
+              <label class="form-label" for="username">Username</label>
+
+              <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="username" name="username" value="{{ form.username.value|default:'' }}" required />
+
+              <div class="text-danger small">{{ form.username.errors|striptags }}</div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label" for="email">Email</label>
+
+              <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" id="email" name="email" value="{{ form.email.value|default:'' }}" required />
+
+              <div class="text-danger small">{{ form.email.errors|striptags }}</div>
+            </div>
+
+            <div class="row">
+              <!-- Password -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="password1">Password</label>
+
+                <input type="password" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" id="password1" name="password1" required />
+
+                <div class="text-danger small">{{ form.password1.errors|striptags }}</div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="password2">Confirm Password</label>
+
+                <input type="password" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" id="password2" name="password2" required />
+
+                <div class="text-danger small">{{ form.password2.errors|striptags }}</div>
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn btn-success w-100">Register</button>
+          </form>
+
+          <!-- Divider -->
+          <div class="text-center my-3 text-muted">OR</div>
+
+          <!-- Google Login/Register -->
+          <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 d-flex justify-content-center align-items-center gap-2">
+            <i class="bi bi-google"></i>
+            Continue with Google
+          </a>
+
+          <!-- Login link -->
+          <p class="text-center mt-3 mb-0">
+            Already have an account?
+            <a href="{% url 'e_shop:login' %}">Login</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

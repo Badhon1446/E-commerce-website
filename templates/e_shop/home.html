@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <style>
+    /* ========== GLOBAL ========== */
+    body {
+      background: #f8fafc;
+      font-family: system-ui, 'Segoe UI', 'Helvetica Neue', sans-serif;
+    }
+    
+    /* ========== STATIC BANNER STYLES (from previous) ========== */
+    .static-banner {
+      background: linear-gradient(125deg, #ffffff 0%, #f2f5fc 100%);
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    
+    /* image placeholder slot (user adds image) */
+    .image-slot {
+      background: #eef2f7;
+      border: 2px dashed #cbd5e1;
+      transition: 0.2s ease;
+      min-height: 240px;
+      cursor: pointer;
+    }
+    .image-slot:hover {
+      border-color: #0d6efd;
+      background: #e9eff5;
+    }
+    
+    /* transparent feature boxes (glassmorphism) */
+    .feature-box-transparent {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.01);
+      transition: all 0.25s ease;
+      border-radius: 24px;
+    }
+    .feature-box-transparent:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.94);
+      border-color: rgba(13, 110, 253, 0.3);
+      box-shadow: 0 20px 28px -12px rgba(0, 0, 0, 0.18);
+    }
+    
+    /* overlapping section control */
+    .feature-overlap {
+      position: relative;
+      margin-top: -2.4rem;
+      z-index: 5;
+      padding-bottom: 1rem;
+    }
+    
+    /* banner text enhancements */
+    .btn-soft-primary {
+      background: #0d6efd;
+      border: none;
+      padding: 0.7rem 2rem;
+      font-weight: 500;
+      box-shadow: 0 8px 18px -6px rgba(13, 110, 253, 0.3);
+      transition: 0.2s;
+    }
+    .btn-soft-primary:hover {
+      background: #0b5ed7;
+      transform: scale(1.02);
+    }
+    .display-4 {
+      font-weight: 800;
+      background: linear-gradient(135deg, #1f2b48, #2a3e6b);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    
+    /* ========== FEATURED PRODUCTS + OFFER BOXES (new code integration) ========== */
+    .product-card {
+      transition: all 0.3s ease;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: none;
+    }
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+    }
+    .card-img-top {
+      border-radius: 1rem 1rem 0 0;
+    }
+    .product-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0b5ed7;
+    }
+    .card-description {
+      font-size: 0.85rem;
+      color: #4b5563;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* seasonal sale & subscription boxes */
+    .feature-box {
+      transition: all 0.3s ease;
+      border-radius: 1.5rem;
+      cursor: pointer;
+    }
+    .feature-box:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.2);
+    }
+    .sale-box {
+      background: linear-gradient(135deg, #f97316, #f59e0b);
+      box-shadow: 0 15px 25px -10px rgba(249, 115, 22, 0.3);
+    }
+    .sub-box {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      box-shadow: 0 15px 25px -10px rgba(30, 58, 138, 0.3);
+    }
+    .sub-input {
+      border-radius: 40px;
+      border: none;
+      padding: 0.6rem 1.2rem;
+    }
+    .btn-light {
+      border-radius: 40px;
+      font-weight: 600;
+      background: white;
+      transition: 0.2s;
+    }
+    .btn-light:hover {
+      background: #f8f9fa;
+      transform: scale(0.97);
+    }
+    
+    /* rating stars keep consistent */
+    .rating-static i {
+      font-size: 0.85rem;
+    }
+    
+    /* responsiveness */
+    @media (max-width: 768px) {
+      .feature-overlap {
+        margin-top: -1.2rem;
+      }
+      .image-slot {
+        min-height: 180px;
+      }
+      .display-4 {
+        font-size: 2rem;
+      }
+      .product-card .btn-sm {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+
+  <div class="container my-4 my-lg-5">
+    <!-- ================= STATIC BANNER SECTION (WITH RIGHT IMAGE SLOT) ================= -->
+    <div class="static-banner rounded-4 shadow-lg overflow-hidden mb-5">
+      <div class="row align-items-center g-4 p-4 p-lg-5">
+        <!-- Left side: promotional content -->
+        <div class="col-md-7 order-2 order-md-1">
+          <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 mb-3 fw-semibold"><i class="bi bi-gem me-1"></i> Summer Edit</span>
+          <h1 class="display-4 fw-bold mb-3">Elevate Your <span class="text-primary">Style</span></h1>
+          <p class="fs-5 mb-4 text-secondary">
+            Discover handpicked trends. Extra <strong>35% off</strong> on first order + express delivery.
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="{% url "e_shop:product_list" %} " class="btn btn-primary btn-soft-primary rounded-pill btn-lg px-5">Shop Now <i class="bi bi-arrow-right-short ms-1 fs-4 align-middle"></i></a>
+            <a href="{% url "e_shop:product_list" %}" class="btn btn-outline-secondary rounded-pill btn-lg px-4 border-2"><i class="bi bi-play-circle me-1"></i> Explore deals</a>
+          </div>
+          <div class="mt-4 d-flex align-items-center gap-4 text-muted small">
+            <span><i class="bi bi-shield-check text-success me-1"></i> Secure payment</span>
+            <span><i class="bi bi-truck"></i> Free returns</span>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE: IMAGE PLACEHOLDER SLOT (user will replace content) -->
+        <div class="col-md-5 order-1 order-md-2 text-center">
+          <div class="image-slot rounded-4 shadow-sm overflow-hidden">
+            <img src="{% static 'images/banner1.jpeg' %}" class="img-fluid w-100" style="height:260px; object-fit:cover;" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TRANSPARENT FEATURE BOXES (overlapping banner bottom) ================= -->
+      <div class="feature-overlap">
+        <div class="container px-3 px-lg-4">
+          <div class="row text-center g-3 g-md-4 justify-content-center">
+            <div class="col-md-3 col-6">
+              <div class="feature-box-transparent p-3 p-md-4 rounded-4 shadow-sm">
+                <i class="bi bi-truck fs-1 text-primary d-block"></i>
+                <h6 class="mt-2 mb-0 fw-semibold">Free Shipping</h6>
+                <small class="text-muted">Orders $49+</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="feature-box-transparent p-3 p-md-4 rounded-4 shadow-sm">
+                <i class="bi bi-arrow-repeat fs-1 text-success d-block"></i>
+                <h6 class="mt-2 mb-0 fw-semibold">Easy Return</h6>
+                <small class="text-muted">30-day policy</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="feature-box-transparent p-3 p-md-4 rounded-4 shadow-sm">
+                <i class="bi bi-shield-lock fs-1 text-warning d-block"></i>
+                <h6 class="mt-2 mb-0 fw-semibold">Secure Checkout</h6>
+                <small class="text-muted">SSL encrypted</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6">
+              <div class="feature-box-transparent p-3 p-md-4 rounded-4 shadow-sm">
+                <i class="bi bi-headset fs-1 text-danger d-block"></i>
+                <h6 class="mt-2 mb-0 fw-semibold">24/7 Support</h6>
+                <small class="text-muted">Live chat & email</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pb-2"></div>
+    </div>
+
+    <!-- ========== FEATURED PRODUCTS SECTION (INTEGRATED FROM USER CODE) ========== -->
+
+    {% comment %} <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+      <a href="#" class="text-decoration-none text-primary fw-semibold">View all <i class="bi bi-arrow-right-short"></i></a>
+    </div> {% endcomment %}
+    <h4 class="mb-2 fw-bold">
+      <i class="bi bi-stars text-primary me-2"></i>
+      Featured Products
+    </h4>
+
+    <div class="row mt-5 pt-2">
+      {% for product in featured_products %}
+        <div class="col-md-3 mb-4">
+          <div class="card h-100 shadow-sm product-card">
+            <img src="{{ product.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;" />
+
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title">{{ product.name }}</h6>
+
+              <p class="card-description">{{ product.description|truncatechars:30 }}</p>
+
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="product-price">৳ {{ product.price }}</span>
+
+                <div class="rating-static">
+                  {% for i in "12345" %}
+                    {% if forloop.counter <= product.avg_rating|default:0 %}
+                      <i class="bi bi-star-fill text-warning"></i>
+                    {% else %}
+                      <i class="bi bi-star text-warning"></i>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="mt-auto">
+                <a href="{% url 'e_shop:product_detail' product.slug %}" class="btn btn-sm btn-outline-primary w-100 mb-2">View Details</a>
+
+                <form action="{% url 'e_shop:cart_add' product.id %}" method="post">
+                  {% csrf_token %}
+
+                  <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="bi bi-cart-plus me-1"></i>
+                    Add to Cart
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- No JavaScript used — pure Bootstrap 5 + CSS interactions -->
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row">
+      <!-- ================= LEFT SIDEBAR FILTER ================= -->
+      <div class="col-md-3">
+        <div class="p-3 bg-white shadow-sm rounded sticky-top" style="top:80px;">
+          <h5 class="mb-3">Filters</h5>
+
+          <!-- CATEGORY -->
+          <h6>Category</h6>
+          <ul class="list-unstyled">
+            <li>
+              <a href="{% url 'e_shop:product_list' %}">All</a>
+            </li>
+            {% for cat in categories %}
+              <li>
+                <a href="{% url 'e_shop:product_list_by_category' cat.slug %}">{{ cat.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <hr />
+
+          <!-- PRICE FILTER -->
+          <form method="GET">
+            <h6>Price Range</h6>
+
+            <input type="number" name="min_price" class="form-control mb-2" placeholder="Min ({{ min_price }})" />
+
+            <input type="number" name="max_price" class="form-control mb-2" placeholder="Max ({{ max_price }})" />
+
+            <hr />
+
+            <!-- RATING -->
+            <h6>Rating</h6>
+
+            <div>
+              <label><input type="radio" name="rating" value="5" />⭐⭐⭐⭐⭐</label><br />
+              <label><input type="radio" name="rating" value="4" />⭐⭐⭐⭐+</label><br />
+              <label><input type="radio" name="rating" value="3" />⭐⭐⭐+</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm w-100 mt-3">Apply Filter</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ================= RIGHT CONTENT ================= -->
+      <div class="col-md-9">
+        <!-- SEARCH BAR -->
+        <form method="GET" class="mb-4" action="{% url 'e_shop:product_list' %}">
+          <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ request.GET.search }}" />
+            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+          </div>
+        </form>
+
+        <!-- PRODUCT GRID -->
+        <div class="row">
+          {% for product in products %}
+            <div class="col-md-3 mb-4">
+              <div class="card product-card h-100 shadow-sm">
+                <img src="{{ product.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;" />
+
+                <div class="card-body d-flex flex-column">
+                  <h6>{{ product.name }}</h6>
+
+                  <p class="text-muted small">{{ product.description|truncatewords:10 }}</p>
+                  <h6 class="text-primary">৳ {{ product.price }}</h6>
+
+                  <!-- RATING -->
+                  <div class="mb-2">
+                    {% with avg=product.average_rating|default:0 %}
+                      {% for i in "12345" %}
+                        {% if forloop.counter <= avg %}
+                          <i class="bi bi-star-fill text-warning"></i>
+                        {% else %}
+                          <i class="bi bi-star text-warning"></i>
+                        {% endif %}
+                      {% endfor %}
+                    {% endwith %}
+                    <span class="text-muted">({{ product.ratings.count }})</span>
+                  </div>
+
+                  <div class="mt-auto">
+                    <a href="{% url 'e_shop:product_detail' product.slug %}" class="btn btn-sm btn-outline-primary w-100 mb-2">View Details</a>
+                  </div>
+                  <form action="{% url 'e_shop:cart_add' product.id %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Add to Cart</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <h3 class="text-center">No products found</h3>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STYLE ================= -->
+  <style>
+    .product-card {
+      transition: 0.3s;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    a {
+      text-decoration: none;
+    }
+  </style>
+{% endblock %}

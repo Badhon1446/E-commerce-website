@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="container py-4">
+    <div class="row g-4">
+      <!-- Left: Billing Form -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-3"><i class="bi bi-file-text"></i> Billing Details</h4>
+            <hr />
+            <form method="post" novalidate>
+              {% csrf_token %}
+
+              <!-- Form fields in two columns -->
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">First Name</label>
+                  {{ form.first_name }}
+                  {% if form.first_name.errors %}
+                    <div class="text-danger small">{{ form.first_name.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Last Name</label>
+                  {{ form.last_name }}
+                  {% if form.last_name.errors %}
+                    <div class="text-danger small">{{ form.last_name.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Email Address</label>
+                  {{ form.email }}
+                  {% if form.email.errors %}
+                    <div class="text-danger small">{{ form.email.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Phone Number</label>
+                  {{ form.phone }}
+                  {% if form.phone.errors %}
+                    <div class="text-danger small">{{ form.phone.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Street Address</label>
+                  {{ form.address }}
+                  {% if form.address.errors %}
+                    <div class="text-danger small">{{ form.address.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">City</label>
+                  {{ form.city }}
+                  {% if form.city.errors %}
+                    <div class="text-danger small">{{ form.city.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Postal Code</label>
+                  {{ form.postal_code }}
+                  {% if form.postal_code.errors %}
+                    <div class="text-danger small">{{ form.postal_code.errors }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Order Notes (optional)</label>
+                  <textarea name="order_note" rows="3" class="form-control" placeholder="Special delivery instructions..."></textarea>
+                </div>
+              </div>
+
+              <!-- Payment Method (just visual) -->
+              <div class="mt-4">
+                <label class="form-label fw-semibold">Payment Method</label>
+
+                <div class="d-flex gap-3 flex-wrap">
+                  <!-- SSLCommerz -->
+                  <div class="form-check border rounded-3 px-3 py-2">
+                    <input class="form-check-input" type="radio" name="payment_method" id="sslcommerz" value="sslcommerz" checked />
+
+                    <label class="form-check-label fw-semibold" for="sslcommerz">
+                      <img src="https://download.logo.wine/logo/SSLCommerz/SSLCommerz-Logo.wine.png" height="22" class="me-1" />
+
+                      SSLCommerz
+                    </label>
+                  </div>
+
+                  <!-- bKash -->
+                  <div class="form-check border rounded-3 px-3 py-2">
+                    <input class="form-check-input" type="radio" name="payment_method" id="bkash" value="bkash" />
+
+                    <label class="form-check-label" for="bkash">
+                      <img src="https://placehold.co/40x20?text=bKash" height="20" class="me-1" />
+
+                      bKash
+                    </label>
+                  </div>
+
+                  <!-- Nagad -->
+                  <div class="form-check border rounded-3 px-3 py-2">
+                    <input class="form-check-input" type="radio" name="payment_method" id="nagad" value="nagad" />
+
+                    <label class="form-check-label" for="nagad">Nagad</label>
+                  </div>
+
+                  <!-- Card -->
+                  <div class="form-check border rounded-3 px-3 py-2">
+                    <input class="form-check-input" type="radio" name="payment_method" id="card" value="card" />
+
+                    <label class="form-check-label" for="card">Credit / Debit Card</label>
+                  </div>
+                </div>
+
+                <small class="text-muted">You will be redirected to SSLCommerz secure payment gateway after placing order.</small>
+              </div>
+
+              <div class="d-flex gap-3 mt-4">
+                <a href="{% url 'e_shop:cart_detail' %}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left"></i> Back to Cart</a>
+                <button type="submit" class="btn btn-primary px-4">
+                  <i class="bi bi-credit-card-fill"></i>
+                  Proceed to Payment
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Order Summary -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px;">
+          <div class="card-body p-4">
+            <h4 class="fw-bold mb-3"><i class="bi bi-cart-check"></i> Your Order</h4>
+            <hr />
+
+            <!-- Cart Items List -->
+            <div class="mb-3" style="max-height: 300px; overflow-y: auto;">
+              {% for item in cart.items.all %}
+                <div class="d-flex gap-3 mb-3 border-bottom pb-2">
+                  <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" width="55" height="55" class="rounded-3 object-fit-cover" />
+                  <div class="flex-grow-1">
+                    <h6 class="mb-0">{{ item.product.name }}</h6>
+                    <small class="text-muted">Qty: {{ item.quantity }}</small>
+                  </div>
+                  <div class="fw-semibold">${{ item.product.price|floatformat:2 }}</div>
+                </div>
+              {% empty %}
+                <p class="text-muted">Cart is empty.</p>
+              {% endfor %}
+            </div>
+
+            <!-- Totals -->
+            {% with subtotal=0 %}
+              {% for item in cart.items.all %}
+                {% with subtotal=subtotal|add:item.product.price|floatformat:2 %}
+
+                {% endwith %}
+              {% endfor %}
+            {% endwith %}
+            <!-- We calculate via JS or manual loop. Let's use Django's built-in: -->
+
+            {% with total=0 %}
+              {% for item in cart.items.all %}
+                {% with total=total|add:item.product.price|floatformat:2 %}
+
+                {% endwith %}
+              {% endfor %}
+            {% endwith %}
+            <!-- Better: pass view context but we can compute on template -->
+            <!-- We'll compute in JS or just display from view context. Since you didn't pass totals, I'll compute in JS. But to be safe, we can compute manually with a template tag. Simpler: use context. I'll assume you'll add total to context. Or use JS. For demo, I'll compute via JS and show static initial. -->
+
+            <div class="mt-3">
+              <div class="d-flex justify-content-between">
+                <span>Subtotal</span>
+                <span id="cartSubtotal">$0.00</span>
+              </div>
+              <div class="d-flex justify-content-between mt-2">
+                <span>Shipping</span>
+                <span>$5.00</span>
+              </div>
+              <div class="d-flex justify-content-between mt-2">
+                <span>Tax (2%)</span>
+                <span id="taxAmount">$0.00</span>
+              </div>
+              <hr />
+              <div class="d-flex justify-content-between fw-bold fs-5">
+                <span>Total</span>
+                <span class="text-primary" id="grandTotal">$0.00</span>
+              </div>
+            </div>
+
+            <!-- Delivery Estimate -->
+            <div class="alert alert-info mt-3 small">
+              <i class="bi bi-truck"></i> Estimated delivery: 3-5 business days
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Calculate totals dynamically based on cart items
+    function updateOrderSummary() {
+      let subtotal = 0
+      document.querySelectorAll('.d-flex.gap-3.mb-3').forEach((row) => {
+        const qtyElem = row.querySelector('small')
+        let qty = 1
+        if (qtyElem) {
+          const match = qtyElem.innerText.match(/\d+/)
+          if (match) qty = parseInt(match[0])
+        }
+        const priceElem = row.querySelector('.fw-semibold:last-child')
+        let price = 0
+        if (priceElem) {
+          price = parseFloat(priceElem.innerText.replace('$', ''))
+        }
+        subtotal += price * qty
+      })
+      document.getElementById('cartSubtotal').innerText = '$' + subtotal.toFixed(2)
+      const tax = subtotal * 0.02
+      document.getElementById('taxAmount').innerText = '$' + tax.toFixed(2)
+      const shipping = 5.0
+      const grand = subtotal + tax + shipping
+      document.getElementById('grandTotal').innerText = '$' + grand.toFixed(2)
+    }
+    window.onload = updateOrderSummary
+  </script>
+
+  <style>
+    .object-fit-cover {
+      object-fit: cover;
+    }
+    /* Custom focus style */
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+  </style>
+{% endblock %}

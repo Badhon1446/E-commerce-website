@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="d-flex">
+    <!-- 🔹 Sidebar -->
+    <div class="bg-dark text-white p-3" style="width: 250px; min-height: 30vh;">
+      <h4 class="text-center mb-4">My Account</h4>
+
+      <ul class="nav flex-column">
+        <li class="nav-item mb-2">
+          <a href="?tab=profile" class="nav-link text-white {% if not order_history_active %}bg-primary rounded{% endif %}"><i class="bi bi-person-circle"></i> Profile Info</a>
+        </li>
+
+        <li class="nav-item mb-2">
+          <a href="?tab=orders" class="nav-link text-white {% if order_history_active %}bg-primary rounded{% endif %}"><i class="bi bi-bag-check"></i> Order History</a>
+        </li>
+        {% comment %} <li class="nav-item mb-2">
+          <a href="?tab=edit" class="nav-link text-white {% if edit_active %}bg-primary rounded{% endif %}"><i class="bi bi-pencil-square"></i> Edit Profile</a>
+        </li> {% endcomment %}
+
+        <li class="nav-item mt-4">
+          <a href="{% url 'e_shop:logout' %}" class="nav-link text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 🔹 Main Content -->
+    <div class="flex-grow-1 p-4">
+      <!-- Welcome -->
+      <h1 class="mb-4 text-primary">Welcome, {{ user.first_name|default:user.username }} 👋</h1>
+
+      <!-- 🔸 PROFILE SECTION -->
+      {% if not order_history_active %}
+        <div class="container bg-white shadow rounded p-4">
+          <h3 class="mb-4 border-bottom pb-2">Profile Information</h3>
+
+          <div class="row text-center">
+            <div class="col-md-3">
+              <h6 class="text-muted">Full Name</h6>
+              <p class="fw-bold">{{ user.get_full_name }}</p>
+            </div>
+
+            <div class="col-md-3">
+              <h6 class="text-muted">Username</h6>
+              <p class="fw-bold">{{ user.username }}</p>
+            </div>
+
+            <div class="col-md-3">
+              <h6 class="text-muted">Email</h6>
+              <p class="fw-bold">{{ user.email }}</p>
+            </div>
+
+            <div class="col-md-3">
+              <h6 class="text-muted">Join Date</h6>
+              <p class="fw-bold">{{ user.date_joined|date:'d M Y' }}</p>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="row mt-5 text-center">
+            <div class="col-md-6">
+              <div class="bg-primary p-4 rounded shadow-sm">
+                <h4 class="text-white">{{ completed_orders }}</h4>
+                <p class="mb-0 text-white">Total Orders Completed</p>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="bg-success p-4 rounded shadow-sm">
+                <h4 class="text-white">৳ {{ total_spent }}</h4>
+                <p class="mb-0 text-white">Total Money Spent</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- 🔸 ORDER HISTORY -->
+      {% if order_history_active %}
+        <div class="container bg-light shadow rounded p-4">
+          <h3 class="mb-4 border-bottom pb-2">Order History</h3>
+
+          {% if orders %}
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Paid</th>
+                  <th>Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for order in orders %}
+                  <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.created|date:'d M Y' }}</td>
+                    <td>
+                      <span class="badge bg-info">{{ order.status }}</span>
+                    </td>
+                    <td>
+                      {% if order.paid %}
+                        <span class="text-success">✔</span>
+                      {% else %}
+                        <span class="text-danger">✘</span>
+                      {% endif %}
+                    </td>
+                    <td>৳ {{ order.get_total_cost }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#orderModal{{ order.id }}"><i class="bi bi-eye"></i> View Details</button>
+                    </td>
+                    <div class="modal fade" id="orderModal{{ order.id }}" tabindex="-1">
+                      <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                          <!-- Header -->
+                          <div class="modal-header">
+                            <h5 class="modal-title">Order #{{ order.id }} Details</h5>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+
+                          <!-- Body -->
+                          <div class="modal-body">
+                            <div class="row">
+                              <!-- LEFT SIDE -->
+                              <div class="col-md-6 border-end">
+                                <h6 class="fw-bold mb-2">Items</h6>
+
+                                {% for item in order.items.all %}
+                                  <div class="d-flex align-items-center mb-2">
+                                    <img src="{{ item.product.image.url }}" width="50" height="50" class="rounded me-2" />
+
+                                    <div>
+                                      <strong>{{ item.product.name }}</strong><br />
+                                      Qty: {{ item.quantity }}
+                                    </div>
+                                  </div>
+                                {% endfor %}
+
+                                <hr />
+
+                                <p>
+                                  <strong>Status:</strong> {{ order.status }}
+                                </p>
+                                <p>
+                                  <strong>Total:</strong> ৳ {{ order.get_total_cost }}
+                                </p>
+
+                                <p>
+                                  <strong>Payment:</strong>
+                                  {% if order.paid %}
+                                    <span class="text-white w-100 bg-success rounded-1">Paid</span>
+                                  {% else %}
+                                    <span class="text-danger">Unpaid</span>
+                                  {% endif %}
+                                </p>
+                              </div>
+
+                              <!-- RIGHT SIDE -->
+                              <div class="col-md-6">
+                                <h6 class="fw-bold mb-2">Shipping Info</h6>
+
+                                <p>
+                                  <strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}
+                                </p>
+                                <p>
+                                  <strong>City:</strong> {{ order.city }}
+                                </p>
+                                <p>
+                                  <strong>Address:</strong> {{ order.address }}
+                                </p>
+                                <p>
+                                  <strong>Email:</strong> {{ order.email }}
+                                </p>
+                                <p>
+                                  <strong>Transaction ID:</strong> {{ order.transaction_id }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p>No orders found.</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

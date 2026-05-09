@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <div class="card shadow border-0 text-center p-5">
+
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size:80px;"></i>
+                </div>
+
+                <h2 class="fw-bold text-success mb-3">
+                    Payment Successful!
+                </h2>
+
+                <p class="text-muted mb-4">
+                    Your order has been placed successfully.
+                    We are now processing your order.
+                </p>
+
+                <div class="d-grid gap-3">
+
+                    <a href="{% url 'e_shop:profile' %}"
+                       class="btn btn-success btn-lg">
+                        View My Orders
+                    </a>
+
+                    <a href="{% url 'e_shop:home' %}"
+                       class="btn btn-outline-dark">
+                        Continue Shopping
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
