@@ -235,26 +235,30 @@ def payment_process(request):
     
 
 @csrf_exempt
-@login_required
-def payment_success(request,order_id):
-    order = get_object_or_404(Order, id=order_id,user=request.user)
+def payment_success(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
     order.paid = True
     order.status = 'processing'
-    order.transaction_id = request.POST.get('bank_tran_id',order_id)
+
+    tran_id = (
+        request.POST.get('bank_tran_id')
+        or request.GET.get('bank_tran_id')
+        or str(order_id)
+    )
+    order.transaction_id = tran_id
     order.save()
 
-    order_items = order.items.all()
-    for item in order_items:
+    for item in order.items.all():
         product = item.product
         product.stock -= item.quantity
-
         if product.stock < 0:
             product.stock = 0
         product.save()
-    
+
     send_order_confirmation_email(order)
-    messages.success(request,"Payment Successful!")
-    return render(request,'e_shop/payment_success.html')
+
+    return redirect('e_shop:profile')
 
 @csrf_exempt
 @login_required
