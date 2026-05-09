@@ -156,6 +156,13 @@
   </style>
 
   <div class="container my-4 my-lg-5">
+    <div class="row align-items-center">
+        <form method="GET" class="mb-4" action="{% url 'e_shop:product_list' %}">
+          <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search products..." value="{{ request.GET.search }}" />
+            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+          </div>
+        </form>
     <!-- ================= STATIC BANNER SECTION (WITH RIGHT IMAGE SLOT) ================= -->
     <div class="static-banner rounded-4 shadow-lg overflow-hidden mb-5">
       <div class="row align-items-center g-4 p-4 p-lg-5">

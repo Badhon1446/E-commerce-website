@@ -277,10 +277,9 @@
     
     const rateBtn = modalBody.querySelector('.rate-btn');
     if (rateBtn) {
-        const productId = row.dataset.productId;   // productId সংগ্রহ
+        const productId = row.dataset.productId;   
         rateBtn.addEventListener('click', () => {
             if (productId) {
-                // তোমার URL pattern অনুযায়ী – সাধারণত /rate/<id>/
                 window.location.href = `/rate/${productId}/`;
             } else {
                 alert('No Product found!');
